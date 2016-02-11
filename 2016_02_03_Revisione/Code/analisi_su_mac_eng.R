@@ -26,6 +26,8 @@ dev.off()
 ##boxplot(psor$età~psor$arthritis, col = "red")
 
 
+
+
 #figure 2
 
 ##names(psor)[13]<- "nails"
@@ -33,6 +35,8 @@ dev.off()
 
 mosaicplot(table(psor[, 13], psor[, 18]), main = "Figure 2. Presence of arthritis (horizontal) 
 and of ungueal psoriasis (vertical)", col = c("red", "green"))  
+
+
 
 dev.copy(jpeg, "figure 2.jpeg", quality=300, width = 529, height=305)
 dev.off()
@@ -184,7 +188,7 @@ psor[, 18]
 psor$arthritis[psor$arthritis == "YES"]<- 1
 psor$arthritis[psor$arthritis == "NOT"]<- 0
 psor$arthritis<- as.numeric(psor$arthritis)
-fit<- glm(arthritis~PASI, data = psor, family = binomial())
-plot(fit)
+##fit<- glm(arthritis~PASI, data = psor, family = binomial())
+##plot(fit)
 boxplot(psor$PASI~psor$arthritis)
 table(psor$PASI, psor$arthritis)

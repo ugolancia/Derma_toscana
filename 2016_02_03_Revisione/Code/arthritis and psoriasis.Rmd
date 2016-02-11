@@ -1,0 +1,101 @@
+---
+title: "Arthritis and Psoriasis"
+author: "Ugo Lancia"
+date: "11 February 2016"
+output: html_document
+---
+
+This is an R Markdown document. 
+
+```{r}
+setwd("~/Desktop/Github/Derma_toscana/2016_02_03_Revisione/Code")
+library(xlsx)
+psor<- read.xlsx("DB_derma_eng.xlsx", 1, stringsAsFactors = FALSE)
+names(psor)[18]<- "arthritis"
+names(psor)[4]<- "age"
+
+library(ggplot2)
+png("fig_1_bis.jpg", width = 6, height = 6, units = 'in', res = 600)
+g<- ggplot(psor, aes(x=arthritis, y=age, fill = arthritis)) + geom_boxplot() + ggtitle("Figure 1. Age in groups without and with arthritis")
+g
+dev.off()
+```
+
+
+```{r}
+ggplot(psor, aes(x=arthritis, y=age, fill = arthritis)) + geom_boxplot() + ggtitle("Figure 1. Age in groups without and with arthritis")
+```
+
+
+Now let's do a t-test
+
+```{r}
+t.test(age~arthritis, data = psor)
+```
+
+It is definitively significant.
+
+Now let's do some test on PASI scores in the two groups. First we analyse the vector with the PASI scores
+
+```{r}
+summary(psor$PASI)
+```
+
+obviously there is a mistake because 90 is not possible as a score. let's recode the wrong value as NA and let's do again the analysis of the PASI scores vector
+
+```{r}
+psor$PASI[psor$PASI>50] <- NA
+summary(psor$PASI)
+table(is.na(psor$PASI), psor$arthritis)
+psorartno<- subset(psor, psor$arthritis == "NOT")
+boxplot(psor$PASI~psor$arthritis)
+t.test(psor$PASI~psor$arthritis)
+wilcox.test(psor$PASI~psor$arthritis)
+```
+
+
+
+
+```{r}
+mosaicplot(table(psor[, 13], psor[, 18]), main = "Figure 2. Presence of arthritis (horizontal) 
+and of ungueal psoriasis (vertical)", col = c("red", "green"))  
+chisq.test(table(psor[, 13], psor[, 18]))
+```
+
+This is not statistically significant p-value = 0.2943
+
+
+```{r}
+mosaicplot(table(psor[, 16], psor[, 18]), main = "Figure 3. Arthritis diagnosis (horizontal) and
+    psoriasis on more than 50 % of body (vertical)", col = c("red", "green"))
+chisq.test(table(psor[, 16], psor[, 18]))
+```
+
+
+let's compare percentages in biological drugs use between groups
+
+```{r}
+x<- c(17, 13, 24, 74)
+m<- matrix(x, 2, 2)
+chisq.test(m)
+```
+
+
+Now let's analyse the time lapse between psoriasis and arthritis diagnosis
+creating a subset with artrite "si""
+
+```{r}
+psorart<- subset(psor, psor$arthritis == "YES")
+table(psorart[, 7])
+dia_art<- psorart[, 19]
+dia_psor<- psorart[, 6]
+time_lapse<- dia_art-dia_psor
+time<- time_lapse[!is.na(time_lapse)]
+time<- as.data.frame(time)
+png("fig_2.jpg", width = 6, height = 4, units = 'in', res = 600)
+ggplot(time, aes(x = factor(0), y = time)) + geom_boxplot(fill = "red") + xlab("") + scale_x_discrete(breaks = NULL) + coord_flip() + ggtitle("Figure 2. Time between diagnosis of psoriasis and of arthritis (years)") + theme(
+plot.title = element_text(size=10))
+dev.off()
+```
+
+
